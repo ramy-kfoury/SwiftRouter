@@ -35,7 +35,10 @@ public class Router {
     
     public func routeURLString(urlString: String?) -> Bool {
         if let url = urlString {
-            return contains(routes.keys, url)
+            var canRoute = contains(routes.keys, url)
+            var closure = routes[url]
+            closure?()
+            return canRoute
         }
         return false
     }

@@ -9,6 +9,11 @@ import SwiftRouter
 class SwiftRouterTests: XCTestCase {
     
     var router = Router()
+    static var didExecuteClosure = false
+    
+    var mockClosure = {
+        SwiftRouterTests.didExecuteClosure = true
+    }
     
     func testWhenAddingExampleRoute_matchedClosureForRouteIsNotNil() {
         router.addRoute("newRoute")
@@ -23,5 +28,13 @@ class SwiftRouterTests: XCTestCase {
         
         var canRoute = router.routeURLString("newRoute")
         XCTAssert(canRoute, "Router should be able to route added route")
+    }
+    
+    func testWhenSpecifyingRouteWithClosure_routerCanRouteIt_thenClosureIsExecuted() {
+        router.addRoute("newRoute", closure: mockClosure)
+        
+        var canRoute = router.routeURLString("newRoute")
+        XCTAssert(canRoute, "Router should be able to route added route")
+        XCTAssert(SwiftRouterTests.didExecuteClosure, "Specified closure should be executed")
     }
 }
