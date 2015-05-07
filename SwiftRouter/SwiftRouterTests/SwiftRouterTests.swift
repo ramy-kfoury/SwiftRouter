@@ -9,18 +9,12 @@ import SwiftRouter
 class SwiftRouterTests: XCTestCase {
     
     var router = Router()
+    static var parameters: [String: AnyObject]? = nil
     static var didExecuteClosure = false
     
-    var mockClosure = {
+    var mockClosure: RouteClosure = { _, parameters in
+        SwiftRouterTests.parameters = parameters
         SwiftRouterTests.didExecuteClosure = true
-    }
-    
-    func testWhenAddingExampleRoute_matchedClosureForRouteIsNotNil() {
-        router.addRoute("newRoute")
-        
-        var closure = router.closureForRoute("newRoute")
-        XCTAssert(router.numberOfRoutes() == 1, "Pass")
-        XCTAssert(closure != nil, "When not defined, closure is the EmptyClosure")
     }
     
     func testWhenSpecifyingRoute_routerCanRouteIt() {
@@ -36,5 +30,17 @@ class SwiftRouterTests: XCTestCase {
         var canRoute = router.routeURLString("newRoute")
         XCTAssert(canRoute, "Router should be able to route added route")
         XCTAssert(SwiftRouterTests.didExecuteClosure, "Specified closure should be executed")
+        XCTAssert(SwiftRouterTests.parameters == nil, "Specified closure should not return parameters")
     }
+    
+    func testWhenSpecifyingRouteWithParameters_routerCanRouteIt() {
+        router.addRoute("newRoute", closure: mockClosure)
+        
+        var canRoute = router.routeURLString("newRoute?param1=value1")
+        XCTAssert(canRoute, "Router should be able to route added route")
+        
+        var containsParameter = contains(SwiftRouterTests.parameters!.keys, "param1")
+        XCTAssert(containsParameter, "returned parameters in closure should contain param1")
+    }
+    
 }
