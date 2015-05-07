@@ -8,7 +8,7 @@ public class Router {
     
     public typealias RouteClosure = () -> ()
     
-    static var emptyClosure: RouteClosure = {}
+    public static var emptyClosure: RouteClosure = {}
     
     public init() {}
     
@@ -20,8 +20,23 @@ public class Router {
         return count(routes)
     }
     
-    public func addRoute(route: String, closure: RouteClosure? = emptyClosure) -> Self {
+    public func addRoute(route: String, closure: RouteClosure = emptyClosure) -> Self {
         routes[route] = closure
         return self
+    }
+    
+    public func closureForRoute(route: String) -> RouteClosure {
+        return routes[route]!
+    }
+    
+    public func routeURL(url: NSURL) -> Bool {
+        return routeURLString(url.absoluteString)
+    }
+    
+    public func routeURLString(urlString: String?) -> Bool {
+        if let url = urlString {
+            return contains(routes.keys, url)
+        }
+        return false
     }
 }
