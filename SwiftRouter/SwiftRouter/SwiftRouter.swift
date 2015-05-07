@@ -40,3 +40,29 @@ public class Router {
         return false
     }
 }
+
+public extension Router {
+    
+    static let sharedInstance = Router()
+    
+    
+    static public func numberOfRoutes() -> Int {
+        return sharedInstance.numberOfRoutes()
+    }
+    
+    static public func addRoute(route: String, closure: RouteClosure = emptyClosure) -> Router {
+        return sharedInstance.addRoute(route, closure: closure)
+    }
+    
+    static public func closureForRoute(route: String) -> RouteClosure {
+        return sharedInstance.routes[route]!
+    }
+    
+    static public func routeURL(url: NSURL) -> Bool {
+        return sharedInstance.routeURL(url)
+    }
+    
+    static public func routeURLString(urlString: String?) -> Bool {
+        return sharedInstance.routeURLString(urlString)
+    }
+}
