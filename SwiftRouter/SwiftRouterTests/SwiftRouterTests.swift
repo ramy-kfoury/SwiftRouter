@@ -12,7 +12,7 @@ class SwiftRouterTests: XCTestCase {
     static var parameters: [String: AnyObject]? = nil
     static var didExecuteClosure = false
     
-    var mockClosure: RouteClosure = { _, parameters in
+    var mockClosure: RouteClosure = { parameters in
         SwiftRouterTests.parameters = parameters
         SwiftRouterTests.didExecuteClosure = true
     }

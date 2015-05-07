@@ -4,12 +4,12 @@
 
 import Foundation
 
-public typealias RouteClosure = (String?, [String: AnyObject]?) -> Void
+public typealias RouteClosure = ([String: AnyObject]?) -> Void
 
 public class Router {
     
     public static var emptyClosure: RouteClosure = {
-        _, _ in
+        _ in
     }
     
     public init() {}
@@ -23,10 +23,6 @@ public class Router {
         return self
     }
     
-    public func closureForRoute(route: String) -> RouteClosure {
-        return routes[route]!
-    }
-    
     public func routeURL(url: NSURL) -> Bool {
         return routeURLString(url.absoluteString)
     }
@@ -34,14 +30,20 @@ public class Router {
     public func routeURLString(urlString: String?) -> Bool {
         if let url = urlString {
             let urlComponents = split(url, maxSplit: 1, allowEmptySlices: true, isSeparator: {$0 == "?"})
-            if let baseRoute = urlComponents.first {
-                var canRoute = contains(routes.keys, baseRoute)
-                var closure = routes[baseRoute]
-                closure?(baseRoute, parameters(fromURLComponents: urlComponents))
-                return canRoute
+            if let baseRoute = urlComponents.first where canRoute(baseRoute) {
+                closureForRoute(baseRoute)(parameters(fromURLComponents: urlComponents))
+                return true
             }
         }
         return false
+    }
+    
+    private func canRoute(route: String) -> Bool {
+        return contains(routes.keys, route)
+    }
+    
+    private func closureForRoute(route: String) -> RouteClosure {
+        return routes[route]!
     }
     
     private func parameters(fromURLComponents components: [String]) -> [String: AnyObject]? {
@@ -79,10 +81,6 @@ public extension Router {
     
     static public func addRoute(route: String, closure: RouteClosure = emptyClosure) -> Router {
         return sharedInstance.addRoute(route, closure: closure)
-    }
-    
-    static public func closureForRoute(route: String) -> RouteClosure {
-        return sharedInstance.routes[route]!
     }
     
     static public func routeURL(url: NSURL) -> Bool {
