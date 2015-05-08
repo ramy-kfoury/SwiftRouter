@@ -9,7 +9,7 @@ import SwiftRouter
 class SwiftRouterTests: XCTestCase {
     
     var router = Router()
-    static var parameters: [String: AnyObject]? = nil
+    static var parameters = [String: String]()
     static var didExecuteClosure = false
     
     var mockClosure: RouteClosure = { parameters in
@@ -17,30 +17,23 @@ class SwiftRouterTests: XCTestCase {
         SwiftRouterTests.didExecuteClosure = true
     }
     
-    func testWhenSpecifyingRoute_routerCanRouteIt() {
-        router.addRoute("newRoute")
+    func testWhenSpecifyingRouteWithPathParameters_routeCanRouteIt_andReturnTheParametersValues() {
+        router.addRoute("newRoute/path1/:param1/path2/:param2", closure: mockClosure)
         
-        var canRoute = router.routeURLString("newRoute")
-        XCTAssert(canRoute, "Router should be able to route added route")
-    }
-    
-    func testWhenSpecifyingRouteWithClosure_routerCanRouteIt_thenClosureIsExecuted() {
-        router.addRoute("newRoute", closure: mockClosure)
-        
-        var canRoute = router.routeURLString("newRoute")
-        XCTAssert(canRoute, "Router should be able to route added route")
-        XCTAssert(SwiftRouterTests.didExecuteClosure, "Specified closure should be executed")
-        XCTAssert(SwiftRouterTests.parameters == nil, "Specified closure should not return parameters")
-    }
-    
-    func testWhenSpecifyingRouteWithParameters_routerCanRouteIt() {
-        router.addRoute("newRoute", closure: mockClosure)
-        
-        var canRoute = router.routeURLString("newRoute?param1=value1")
+        var canRoute = router.routeURLString("newRoute/path1/value1/path2/value2?param3=value3")
         XCTAssert(canRoute, "Router should be able to route added route")
         
-        var containsParameter = contains(SwiftRouterTests.parameters!.keys, "param1")
-        XCTAssert(containsParameter, "returned parameters in closure should contain param1")
+        let containsParameter1 = contains(SwiftRouterTests.parameters.keys, "param1")
+        let containsParameter2 = contains(SwiftRouterTests.parameters.keys, "param2")
+        let containsParameter3 = contains(SwiftRouterTests.parameters.keys, "param3")
+        
+        let resultValue1 = SwiftRouterTests.parameters["param1"]
+        let resultValue2 = SwiftRouterTests.parameters["param2"]
+        let resultValue3 = SwiftRouterTests.parameters["param3"]
+        
+        XCTAssert(containsParameter1 && resultValue1 == "value1", "parameter1 should be equal to value1")
+        XCTAssert(containsParameter2 && resultValue2 == "value2", "parameter2 should be equal to value2")
+        XCTAssert(containsParameter3 && resultValue3 == "value3", "parameter3 should be equal to value3")
     }
     
 }
