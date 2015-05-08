@@ -6,18 +6,17 @@ import Foundation
 
 public typealias RouteParameters = [String: String]
 
-func += <K, V> (inout left: [K: V], right: [K: V]?) {
-    if right == nil {
-        return
-    }
-    for (k, v) in right! {
-        left.updateValue(v, forKey: k)
+func += <K, V> (inout lhs: [K: V], rhs: [K: V]?) {
+    if let right = rhs {
+        for (k, v) in right {
+            lhs[k] = v
+        }
     }
 }
 
-struct Route {
+private struct Route {
     var pattern: String?
-    var parameters: RouteParameters?
+    var pathParameters: RouteParameters?
 }
 
 public typealias RouteClosure = (RouteParameters) -> Void
@@ -46,62 +45,69 @@ public class Router {
     public func routeURLString(urlString: String?) -> Bool {
         if let url = urlString {
             let urlComponents = url.componentsSeparatedByString("?")
-            if let baseRoute = urlComponents.first
-                where canRoute(baseRoute) {
-                var route = pattern(forRoute: baseRoute)
-                var parameters = RouteParameters()
-                parameters += route?.parameters
-                parameters += queryParameters(fromURLComponents: urlComponents)
-                closureForRoute(baseRoute)(parameters)
-                return true
+            if let baseURL = urlComponents.first {
+                if let route = findRoute(forURL: baseURL) {
+                    var parameters = RouteParameters()
+                    parameters += route.pathParameters
+                    parameters += queryParameters(fromURLComponents: urlComponents)
+                    closure(forPattern: route.pattern)(parameters)
+                    return true
+                }
             }
         }
         return false
     }
     
-    private func closureForRoute(route: String) -> RouteClosure {
-        if let route = pattern(forRoute: route) {
+    private func closure(forPattern pattern: String?) -> RouteClosure {
+        if let route = findRoute(forURL: pattern) {
             return routes[route.pattern!]!
         }
         return Router.emptyClosure
     }
     
-    private func canRoute(route: String) -> Bool {
-        return pattern(forRoute: route) != nil
+    private func canRoute(URL url: String) -> Bool {
+        return findRoute(forURL: url) != nil
     }
     
-    private func pattern(forRoute route: String) -> Route? {
-        for routePattern in routes.keys {
-            if route ~= routePattern {
-                return Route(pattern: routePattern, parameters: nil)
-            }
-            var routePatternPaths = routePattern.componentsSeparatedByString("/")
-            var fields = routePatternPaths.filter { $0.hasPrefix(":") }
-            var routePatternPathsNew: [String] = routePatternPaths.map {
-                if $0.hasPrefix(":") {
-                    return "\\w+"
-                }
-                return $0
-            }
-            let pattern = join("/", routePatternPathsNew)
-            let regex = NSRegularExpression(pattern: pattern, options: .CaseInsensitive, error: nil)
-            let range = NSMakeRange(0, count(route))
-            let matches = regex?.matchesInString(route, options: .allZeros, range: range) as! [NSTextCheckingResult]
-            if count(matches) > 0 {
-                var parameters = RouteParameters()
-                var fields = route.componentsSeparatedByString("/")
-                for i in 0..<count(fields) {
-                    var pattern = routePatternPaths[i]
-                    if pattern.hasPrefix(":") {
-                        pattern = pattern.substringFromIndex(advance(pattern.startIndex, 1))
-                        parameters[pattern] = fields[i]
-                    }
-                }
-                return Route(pattern: routePattern, parameters: parameters)
-            }
+    private func findRoute(forURL url: String? = nil) -> Route? {
+        if url == nil {
             return nil
         }
+        let routeURL = url!
+        for routePattern in routes.keys {
+            if routeURL ~= routePattern {
+                return Route(pattern: routePattern, pathParameters: nil)
+            }
+            var routePatternPaths = routePattern.componentsSeparatedByString("/")
+            if canMatch(routeURL, fromPaths: routePatternPaths) {
+                var parameters = pathParameters(forURL: routeURL, fromPatternPaths: routePatternPaths)
+                return Route(pattern: routePattern, pathParameters: parameters)
+            }
+        }
         return nil
+    }
+    
+    private func pathParameters(forURL routeURL: String, fromPatternPaths patternPaths: [String]) -> RouteParameters {
+        var parameters = RouteParameters()
+        var routePaths = routeURL.componentsSeparatedByString("/")
+        for i in 0..<count(routePaths) {
+            var pattern = patternPaths[i]
+            if pattern.hasPrefix(":") {
+                pattern = pattern.substringFromIndex(advance(pattern.startIndex, 1))
+                parameters[pattern] = routePaths[i]
+            }
+        }
+        return parameters
+    }
+    
+    private func canMatch(pattern: String, fromPaths patternPaths: [String]) -> Bool {
+        let modifiedRoutePatternPaths: [String] = patternPaths.map { $0.hasPrefix(":") ? "\\w+" : $0 }
+        let regexPattern = join("/", modifiedRoutePatternPaths)
+        let regex = NSRegularExpression(pattern: regexPattern, options: .CaseInsensitive, error: nil)
+        if let matches = regex?.matchesInString(pattern, options: .allZeros, range: NSMakeRange(0, count(pattern))) {
+            return !matches.isEmpty
+        }
+        return false
     }
     
     private func queryParameters(fromURLComponents components: [String]) -> RouteParameters? {
