@@ -23,11 +23,9 @@ public typealias RouteClosure = (RouteParameters) -> Void
 
 public class Router {
     
-    public init() {}
+    var routes = [String: RouteClosure]()
     
-    lazy var routes: [String: RouteClosure] = {
-        return [String: RouteClosure]()
-    }()
+    public init() {}
     
     public func addRoute(route: String, closure: RouteClosure) -> Self {
         routes[route] = closure
@@ -41,14 +39,13 @@ public class Router {
     public func routeURLString(urlString: String?) -> Bool {
         if let url = urlString {
             let urlComponents = url.componentsSeparatedByString("?")
-            if let baseURL = urlComponents.first {
-                if let route = findRoute(forURL: baseURL) {
+            if let baseURL = urlComponents.first,
+                let route = findRoute(forURL: baseURL) {
                     var parameters = RouteParameters()
                     parameters += route.pathParameters
                     parameters += queryParameters(fromURLComponents: urlComponents)
                     closure(forPattern: route.pattern)?(parameters)
                     return true
-                }
             }
         }
         return false
@@ -122,7 +119,7 @@ private extension String {
         let keyValues = componentsSeparatedByString("&")
         if count(keyValues) > 0 {
             for pair in keyValues {
-                let kv = pair.componentsSeparatedByString("=")
+                let kv = split(pair, maxSplit: 1, allowEmptySlices: true, isSeparator: { $0 == "="})
                 if let key = kv.first, value = kv.last {
                     parameters[key] = value
                 }

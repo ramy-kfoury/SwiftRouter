@@ -8,10 +8,18 @@ import SwiftRouter
 
 class SwiftRouterTests: XCTestCase {
     
-    var router = Router()
-    static var parameters = [String: String]()
-    static var didExecuteClosure = false
-    static let route = "newRoute/path1/:param1/path2/:param2"
+    let route = "newRoute/path1/:param1/path2/:param2"
+    
+    var router: Router?
+    static var parameters: [String: String]?
+    static var didExecuteClosure: Bool?
+    
+    override func setUp() {
+        super.setUp()
+        router = Router()
+        SwiftRouterTests.parameters = [String: String]()
+        SwiftRouterTests.didExecuteClosure = false
+    }
     
     var mockClosure: RouteClosure = { parameters in
         SwiftRouterTests.parameters = parameters
@@ -19,23 +27,22 @@ class SwiftRouterTests: XCTestCase {
     }
     
     func testWhenURLIsNil_routerCantRouteIt() {
-        var canRoute = router.routeURLString(nil)
-        XCTAssert(canRoute == false, "router shouldn't route nil route")
+        var canRoute = router?.routeURLString(nil) ?? false
+        XCTAssertFalse(canRoute, "router shouldn't route nil route")
     }
     
     func testWhenValidURLIsNotAddedBefore_routerCantRouteIt() {
-        var canRoute = router.routeURLString(SwiftRouterTests.route)
-        XCTAssert(canRoute == false, "router shouldn't route nil route")
+        var canRoute = router?.routeURLString(route)  ?? false
+        XCTAssertFalse(canRoute, "router shouldn't route nil route")
     }
     
     func testWhenSpecifyingRouteWithPathParameters_routerCanRouteIt_andReturnTheParametersValues() {
-        router.addRoute(SwiftRouterTests.route, closure: mockClosure)
+        router?.addRoute(route, closure: mockClosure)
         
-        let canRoute = router.routeURLString("newRoute/path1/value1/path2/value2?param3=value3")
-        XCTAssert(canRoute, "Router should be able to route added route")
+        router?.routeURLString("newRoute/path1/value1/path2/value2?param3=value3=")
         
-        let expectedParameters = ["param1": "value1", "param2": "value2", "param3": "value3"]
-        XCTAssert(expectedParameters == SwiftRouterTests.parameters, "expected parameters should be equal to returned parameters")
+        let expectedParameters = ["param1": "value1", "param2": "value2", "param3": "value3="]
+        XCTAssert(expectedParameters == SwiftRouterTests.parameters!, "expected parameters should be equal to returned parameters")
     }
     
 }
