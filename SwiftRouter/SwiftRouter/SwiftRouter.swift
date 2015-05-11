@@ -23,17 +23,13 @@ public typealias RouteClosure = (RouteParameters) -> Void
 
 public class Router {
     
-    public static var emptyClosure: RouteClosure = {
-        _ in
-    }
-    
     public init() {}
     
     lazy var routes: [String: RouteClosure] = {
         return [String: RouteClosure]()
     }()
     
-    public func addRoute(route: String, closure: RouteClosure = emptyClosure) -> Self {
+    public func addRoute(route: String, closure: RouteClosure) -> Self {
         routes[route] = closure
         return self
     }
@@ -50,7 +46,7 @@ public class Router {
                     var parameters = RouteParameters()
                     parameters += route.pathParameters
                     parameters += queryParameters(fromURLComponents: urlComponents)
-                    closure(forPattern: route.pattern)(parameters)
+                    closure(forPattern: route.pattern)?(parameters)
                     return true
                 }
             }
@@ -58,11 +54,11 @@ public class Router {
         return false
     }
     
-    private func closure(forPattern pattern: String?) -> RouteClosure {
+    private func closure(forPattern pattern: String?) -> RouteClosure? {
         if let route = findRoute(forURL: pattern) {
             return routes[route.pattern!]!
         }
-        return Router.emptyClosure
+        return nil
     }
     
     private func canRoute(URL url: String) -> Bool {
@@ -141,7 +137,7 @@ public extension Router {
     
     static let sharedInstance = Router()
     
-    static public func addRoute(route: String, closure: RouteClosure = emptyClosure) -> Router {
+    static public func addRoute(route: String, closure: RouteClosure) -> Router {
         return sharedInstance.addRoute(route, closure: closure)
     }
     
