@@ -110,7 +110,7 @@ public class Router {
         return nil
     }
     
-    static let sharedInstance = Router()
+    public static let sharedInstance = Router()
     
     class public func addRoute(route: String, closure: RouteClosure) -> Router {
         return sharedInstance.addRoute(route, closure: closure)
