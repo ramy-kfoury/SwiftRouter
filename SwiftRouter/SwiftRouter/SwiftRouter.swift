@@ -112,15 +112,15 @@ public class Router {
     
     static let sharedInstance = Router()
     
-    static public func addRoute(route: String, closure: RouteClosure) -> Router {
+    class public func addRoute(route: String, closure: RouteClosure) -> Router {
         return sharedInstance.addRoute(route, closure: closure)
     }
     
-    static public func routeURL(url: NSURL) -> Bool {
+    class public func routeURL(url: NSURL) -> Bool {
         return sharedInstance.routeURL(url)
     }
     
-    static public func routeURLString(urlString: String?) -> Bool {
+    class public func routeURLString(urlString: String?) -> Bool {
         return sharedInstance.routeURLString(urlString)
     }
     
