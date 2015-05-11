@@ -110,6 +110,20 @@ public class Router {
         return nil
     }
     
+    static let sharedInstance = Router()
+    
+    static public func addRoute(route: String, closure: RouteClosure) -> Router {
+        return sharedInstance.addRoute(route, closure: closure)
+    }
+    
+    static public func routeURL(url: NSURL) -> Bool {
+        return sharedInstance.routeURL(url)
+    }
+    
+    static public func routeURLString(urlString: String?) -> Bool {
+        return sharedInstance.routeURLString(urlString)
+    }
+    
 }
 
 private extension String {
@@ -126,23 +140,5 @@ private extension String {
             }
         }
         return parameters
-    }
-    
-}
-
-public extension Router {
-    
-    static let sharedInstance = Router()
-    
-    static public func addRoute(route: String, closure: RouteClosure) -> Router {
-        return sharedInstance.addRoute(route, closure: closure)
-    }
-    
-    static public func routeURL(url: NSURL) -> Bool {
-        return sharedInstance.routeURL(url)
-    }
-    
-    static public func routeURLString(urlString: String?) -> Bool {
-        return sharedInstance.routeURLString(urlString)
     }
 }
