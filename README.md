@@ -55,6 +55,9 @@ To call a route from anywhere in your app:
 UIApplication.sharedApplication().openURL(URL)
 ```
 
+## TODO
+- Investigate using NSURLComponents for better parsing of routes
+
 ## Licence
 
 SwiftRouter is released under the MIT license. See LICENSE for details
