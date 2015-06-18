@@ -71,9 +71,9 @@ public class Router {
             if routeURL ~= routePattern {
                 return Route(pattern: routePattern, pathParameters: nil)
             }
-            var routePatternPaths = routePattern.componentsSeparatedByString("/")
+            let routePatternPaths = routePattern.componentsSeparatedByString("/")
             if canMatch(routeURL, fromPaths: routePatternPaths) {
-                var parameters = pathParameters(forURL: routeURL, fromPatternPaths: routePatternPaths)
+                let parameters = pathParameters(forURL: routeURL, fromPatternPaths: routePatternPaths)
                 return Route(pattern: routePattern, pathParameters: parameters)
             }
         }
@@ -83,7 +83,7 @@ public class Router {
     private func pathParameters(forURL routeURL: String, fromPatternPaths patternPaths: [String]) -> RouteParameters {
         var parameters = RouteParameters()
         var routePaths = routeURL.componentsSeparatedByString("/")
-        for i in 0..<count(routePaths) {
+        for i in 0..<routePaths.count {
             var pattern = patternPaths[i]
             if pattern.hasPrefix(":") {
                 pattern = pattern.substringFromIndex(advance(pattern.startIndex, 1))
@@ -95,16 +95,21 @@ public class Router {
     
     private func canMatch(pattern: String, fromPaths patternPaths: [String]) -> Bool {
         let modifiedRoutePatternPaths: [String] = patternPaths.map { $0.hasPrefix(":") ? "\\w+" : $0 }
-        let regexPattern = join("/", modifiedRoutePatternPaths)
-        let regex = NSRegularExpression(pattern: regexPattern, options: .CaseInsensitive, error: nil)
-        if let matches = regex?.matchesInString(pattern, options: .allZeros, range: NSMakeRange(0, count(pattern))) {
+        let regexPattern = "/".join(modifiedRoutePatternPaths)
+        let regex: NSRegularExpression?
+        do {
+            regex = try NSRegularExpression(pattern: regexPattern, options: .CaseInsensitive)
+        } catch _ {
+            regex = nil
+        }
+        if let matches = regex?.matchesInString(pattern, options: [], range: NSMakeRange(0, pattern.characters.count)) {
             return !matches.isEmpty
         }
         return false
     }
     
     private func queryParameters(fromURLComponents components: [String]) -> RouteParameters? {
-        if count(components) > 1 {
+        if components.count > 1 {
             return components.last?.parameters()
         }
         return nil
@@ -131,9 +136,9 @@ private extension String {
     private func parameters() -> RouteParameters {
         var parameters = RouteParameters()
         let keyValues = componentsSeparatedByString("&")
-        if count(keyValues) > 0 {
+        if keyValues.count > 0 {
             for pair in keyValues {
-                let kv = split(pair, maxSplit: 1, allowEmptySlices: true, isSeparator: { $0 == "="})
+                let kv = split(pair.characters, maxSplit: 1, allowEmptySlices: true, isSeparator: { $0 == "="}).map { String($0) }
                 if let key = kv.first, value = kv.last {
                     parameters[key] = value
                 }

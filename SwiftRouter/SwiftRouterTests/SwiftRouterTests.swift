@@ -27,18 +27,18 @@ class SwiftRouterTests: XCTestCase {
     }
     
     func testWhenURLIsNil_routerCantRouteIt() {
-        var canRoute = router?.routeURLString(nil) ?? false
+        let canRoute = router?.routeURLString(nil) ?? false
         XCTAssertFalse(canRoute, "router shouldn't route nil route")
     }
     
     func testWhenValidURLIsNotAddedBefore_routerCantRouteIt() {
-        var canRoute = router?.routeURLString("scheme://route")  ?? false
+        let canRoute = router?.routeURLString("scheme://route")  ?? false
         XCTAssertFalse(canRoute, "router should route valid route")
     }
     
     func testWhenValidURLAndRouteWassAddedBefore_routerCanRouteIt() {
         router?.addRoute("scheme://route", closure: mockClosure)
-        var canRoute = router?.routeURLString("scheme://route")  ?? false
+        let canRoute = router?.routeURLString("scheme://route")  ?? false
         XCTAssertTrue(canRoute, "router should route valid route")
     }
     
