@@ -138,7 +138,7 @@ private extension String {
         let keyValues = componentsSeparatedByString("&")
         if keyValues.count > 0 {
             for pair in keyValues {
-                let kv = split(pair.characters, maxSplit: 1, allowEmptySlices: true, isSeparator: { $0 == "="}).map { String($0) }
+                let kv = pair.characters.split(1, allowEmptySlices: true, isSeparator: { $0 == "="}).map { String($0) }
                 if let key = kv.first, value = kv.last {
                     parameters[key] = value
                 }
