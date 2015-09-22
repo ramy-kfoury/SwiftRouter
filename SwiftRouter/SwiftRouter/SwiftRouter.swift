@@ -86,7 +86,7 @@ public class Router {
         for i in 0..<routePaths.count {
             var pattern = patternPaths[i]
             if pattern.hasPrefix(":") {
-                pattern = pattern.substringFromIndex(advance(pattern.startIndex, 1))
+                pattern = pattern.substringFromIndex(pattern.startIndex.advancedBy(1))
                 parameters[pattern] = routePaths[i]
             }
         }
@@ -95,7 +95,7 @@ public class Router {
     
     private func canMatch(pattern: String, fromPaths patternPaths: [String]) -> Bool {
         let modifiedRoutePatternPaths: [String] = patternPaths.map { $0.hasPrefix(":") ? "\\w+" : $0 }
-        let regexPattern = "/".join(modifiedRoutePatternPaths)
+        let regexPattern = modifiedRoutePatternPaths.joinWithSeparator("/")
         let regex: NSRegularExpression?
         do {
             regex = try NSRegularExpression(pattern: regexPattern, options: .CaseInsensitive)
