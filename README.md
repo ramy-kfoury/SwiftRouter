@@ -7,7 +7,8 @@ A Swift Router Implementation.
 ## Requirements
 
 - iOS 8+
-- Xcode 6.3+
+- Swift 3
+- Xcode 8+
 
 ## Installation
 
@@ -28,9 +29,9 @@ pod 'SwiftMessageBar'
 To use the router, first create an instance of it in your AppDelegate class, and then update the following method:
 
 ```swift
-func application(application: UIApplication, openURL url: NSURL, sourceApplication: String?, annotation: AnyObject?) -> Bool {
+func application(_ application: UIApplication, open url: URL, sourceApplication: String?, annotation: Any) -> Bool {
         return router.routeURL(url)
-    }
+}
 ```
 
 Adding a route requires only a route parameter, and a closure to implement your action 
@@ -38,15 +39,15 @@ Adding a route requires only a route parameter, and a closure to implement your 
 ```swift
 addRoute(yourCustomRoute) { [unowned self] parameters in
             // present a view controller or anything you like to do when this route is detected
-        }
+}
 ```
 The closure returns to you the parsed parameters, which can be either path parameters or query parameters. Here's an example:
 
 ```swift
 route = scheme://host/path/parameter1/value1?parameter2=value2
 parameters = [
-"parameter1": "value1"
-"parameter2": "value2"
+    "parameter1": "value1"
+    "parameter2": "value2"
 ]
 ```
 
@@ -54,9 +55,6 @@ To call a route from anywhere in your app:
 ```swift
 UIApplication.sharedApplication().openURL(URL)
 ```
-
-## TODO
-- Investigate using NSURLComponents for better parsing of routes
 
 ## Licence
 
